@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Prediksi Peta IPM</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    #map { height: 600px; width: 100%; }
+  </style>
+</head>
+<body class="bg-gray-50 p-6">
+
+  <!-- Navbar (optional) -->
+  <nav class="fixed w-full z-20 top-0 start-0 h-16 border-b border-gray-200 bg-white">
+    <div class="flex flex-wrap items-center justify-between max-w-screen-lg mx-auto py-4">
+        <a href="/" class="flex items-center gap-3">
+            <img src="{{ url_for('static', filename='logo.webp') }}" class="max-h-10" alt="Tugas Akhir">
+            <span class="text-lg font-semibold text-[#05386b]">Tugas Akhir</span>
+        </a>
+        <div class="flex items-center justify-between gap-8">
+            <a href="/" class="font-medium text-sm text-black hover:text-[#05386b]">Beranda</a>
+            <a href="/training" class="font-medium text-sm text-black hover:text-[#05386b]">Training</a>
+            <a href="/testing" class="font-medium text-sm text-black hover:text-[#05386b]">Testing</a>
+            <a href="/prediction" class="font-medium text-sm text-[#05386b] hover:underline">Predict</a>
+        </div>
+    </div>
+  </nav>
+
+  <div class="pt-20">
+    <h1 class="text-2xl font-bold mb-4">Peta Prediksi IPM</h1>
+    <div id="map" class="w-full h-[600px] mb-6 rounded shadow"></div>
+
+    <!-- <h2 class="text-xl font-semibold mb-2">Tabel Prediksi</h2>
+    <div class="overflow-x-auto">
+      <table class="table-auto border w-full text-sm">
+        <thead class="bg-blue-200 text-left">
+          {% if result and result[0] %}
+          <tr>
+            {% for col in result[0].keys() %}
+            <th class="border px-4 py-2">{{ col }}</th>
+            {% endfor %}
+          </tr>
+          {% endif %}
+        </thead>
+        <tbody>
+          {% for row in result %}
+          <tr class="odd:bg-white even:bg-blue-50">
+            {% for val in row.values() %}
+            <td class="border px-4 py-2">{{ val }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div> -->
+  </div>
+  <h2 class="text-xl font-semibold mt-10 mb-2">Pengaruh Indikator terhadap Prediksi IPM</h2>
+  <div id="featureChart" class="mb-8"></div>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script>
+    const chartData = {{ chart | safe }};
+    Plotly.newPlot("featureChart", chartData.data, chartData.layout);
+  </script>
+  
+  <!-- Leaflet Map Script -->
+  <script>
+    var map = L.map('map').setView([-2.5, 118], 5);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    function getColor(ipm) {
+        return ipm > 80 ? '#005a32' :
+               ipm > 75 ? '#238b45' :
+               ipm > 70 ? '#41ab5d' :
+               ipm > 65 ? '#74c476' :
+               ipm > 60 ? '#a1d99b' :
+                          '#c7e9c0';
+    }
+
+    fetch("/static/map_with_predictions.json")
+      .then(res => res.json())
+      .then(data => {
+        L.geoJson(data, {
+          style: feature => ({
+            fillColor: getColor(feature.properties.IPM_Prediksi),
+            weight: 1,
+            color: "white",
+            fillOpacity: 0.8
+          }),
+          onEachFeature: (feature, layer) => {
+            const props = feature.properties;
+            let popupHtml = `<strong>${props.Propinsi}</strong><br><strong>IPM Prediksi:</strong> ${props.IPM_Prediksi ?? 'N/A'}`;
+            for (const [key, value] of Object.entries(props)) {
+              if (!["Propinsi", "IPM_Prediksi", "geometry"].includes(key)) {
+                popupHtml += `<br><strong>${key}</strong>: ${value}`;
+              }
+            }
+            layer.bindPopup(popupHtml);
+          }
+        }).addTo(map);
+      });
+  </script>
+
+</body>
+</html>

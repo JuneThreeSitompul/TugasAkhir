@@ -1,0 +1,24 @@
+body {
+    font-family: "Plus Jakarta Sans", Arial, sans-serif;
+}
+
+
+
+.datatable-top,
+.datatable-info {
+    display: none !important;
+}
+
+.datatable-bottom {
+    justify-content: flex-end !important;
+}
+
+.datatable-pagination-list-item:not(:first-child, :last-child) 
+.datatable-pagination-list-item-link {
+    color: #d1d5db !important;
+}
+
+.datatable-pagination-list-item:not(:first-child, :last-child).datatable-active 
+.datatable-pagination-list-item-link {
+    color: #000000 !important;
+}

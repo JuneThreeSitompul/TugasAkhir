@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Training Result</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- jQuery dan DataTables CDN -->
+    <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+</head>
+<body class="min-h-screen p-6" style="background: linear-gradient(to bottom, rgba(15, 82, 186, 0.2), rgba(255, 255, 255, 0.5));">
+    <div class="max-w-7xl mx-auto">
+
+
+        <!-- Navbar -->
+        <nav class="fixed w-full z-20 top-0 start-0 h-16 border-b border-gray-200 bg-white">
+            <div class="flex flex-wrap items-center justify-between max-w-screen-lg mx-auto py-4">
+                <a href="/" class="flex items-center gap-3">
+                    <img src="{{ url_for('static', filename='logo.webp') }}" class="max-h-10" alt="Tugas Akhir">
+                    <span class="text-lg font-semibold text-[#05386b]">Tugas Akhir</span>
+                </a>
+                <div class="flex items-center justify-between gap-8" id="navbar-sticky">
+                    <a href="/" class="active font-medium text-sm text-black hover:hover:text-[#05386b]">Beranda</a>
+                    <a href="/training" class="font-medium text-sm text-[#05386b] hover:underline">Training</a>
+                    <a href="/testing" class="font-medium text-sm text-black hover:text-[#05386b]">Testing</a>
+                    <a href="/predict" class="font-medium text-sm text-black hover:text-[#05386b]">Predict</a>
+                </div>
+            </div>
+        </nav>
+
+        <h1 class="text-3xl font-bold mb-6">Hasil Pelatihan Model Random Forest</h1>
+
+        <!-- Section: Best Model -->
+        <h2 class="text-xl font-semibold mb-2">Best Model Parameters</h2>
+        {% if best_model %}
+        <table class="table-auto w-full text-sm border-collapse border mb-8">
+            <thead>
+                <tr class="bg-gray-200" style="background-color: #64748bbe;">
+                    {% for key in best_model.keys() %}
+                    <th class="border px-4 py-2">{{ key }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    {% for value in best_model.values() %}
+                    <td class="border px-4 py-2" style="background-color: #065f468e;">{{ value | round(2) }}</td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+        {% else %}
+        <div class="text-gray-500 mb-16">Belum ada model terbaik yang ditemukan.</div>
+        {% endif %}
+
+        <!-- Section: Grid Search Results -->
+        <h2 class="text-xl font-semibold mb-2">Hasil Grid Search Cross Validation</h2>
+        <div class="overflow-x-auto">
+            <table id="resultsTable" class="display table-auto w-full text-sm border-collapse border" style="background-color: rgba(120, 155, 208, 0.741);">
+                <thead>
+                    <tr class="bg-blue-800 text-white text-sm">
+                        {% if results and results|length > 0 %}
+                            {% for key in results[0].keys() %}
+                            <th class="border px-4 py-2 font-semibold uppercase">{{ key }}</th>
+                            {% endfor %}
+                        {% else %}
+                            <th class="border px-4 py-2">Data belum tersedia</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if results %}
+                        {% for row in results %}
+                        <tr class="odd:bg-white even:bg-blue-50 hover:bg-blue-200">
+                            {% for value in row.values() %}
+                            <td class="border px-4 py-2">{{ value | round(2)}}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td class="border px-4 py-2 text-gray-500 text-center" colspan="100%">Belum ada data hasil training.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- DataTables setup with 20 items per page -->
+    <script>
+        $(document).ready(function () {
+            $('#resultsTable').DataTable({
+                pageLength: 20
+            });
+        });
+    </script>
+</body>
+</html>
